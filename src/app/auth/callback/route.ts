@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/en";
+  const rawNext = searchParams.get("next") ?? "/en";
+  // 仅允许站内相对路径，防止开放重定向
+  const next =
+    rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/en";
 
   if (code) {
     const supabase = await createClient();

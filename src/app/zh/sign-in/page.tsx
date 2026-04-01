@@ -3,7 +3,15 @@ import { signInWithGitHub, signInWithEmail } from "@/lib/actions";
 
 export const metadata = { title: "登录" };
 
-export default function Page() {
+type Props = {
+  searchParams: Promise<{ sent?: string; error?: string }>;
+};
+
+export default async function Page({ searchParams }: Props) {
+  const sp = await searchParams;
+  const sent = sp.sent === "1";
+  const error = typeof sp.error === "string" ? sp.error : undefined;
+
   const inputStyle = {
     background: "var(--bg-secondary)",
     border: "1px solid var(--border-color)",
@@ -16,6 +24,34 @@ export default function Page() {
       <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
         {t("zh", "signin.note")}
       </p>
+
+      {sent ? (
+        <div
+          className="mt-6 rounded-xl border px-4 py-3 text-sm"
+          style={{
+            background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+            borderColor: "var(--accent)",
+            color: "var(--text-primary)",
+          }}
+          role="status"
+        >
+          {t("zh", "signin.sent")}
+        </div>
+      ) : null}
+
+      {error ? (
+        <div
+          className="mt-6 rounded-xl border px-4 py-3 text-sm"
+          style={{
+            background: "color-mix(in srgb, #ef4444 12%, transparent)",
+            borderColor: "rgba(239, 68, 68, 0.45)",
+            color: "var(--text-primary)",
+          }}
+          role="alert"
+        >
+          {error}
+        </div>
+      ) : null}
 
       <div
         className="mt-8 space-y-5 rounded-xl p-6"

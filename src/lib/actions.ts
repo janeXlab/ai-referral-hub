@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { t } from "@/lib/i18n";
 
 export async function signInWithGitHub(locale: string) {
   const supabase = await createClient();
@@ -46,9 +47,15 @@ export async function signInWithGoogle(locale: string) {
 
 export async function signInWithEmail(formData: FormData): Promise<void> {
   const supabase = await createClient();
-  const email = formData.get("email") as string;
+  const raw = (formData.get("email") as string) || "";
+  const email = raw.trim().toLowerCase();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const locale = (formData.get("locale") as string) || "en";
+
+  const loc = locale === "zh" ? "zh" : "en";
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    redirect(`/${locale}/sign-in?error=${encodeURIComponent(t(loc, "signin.error.invalid"))}`);
+  }
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -58,7 +65,8 @@ export async function signInWithEmail(formData: FormData): Promise<void> {
   });
 
   if (error) {
-    redirect(`/${locale}/sign-in?error=${encodeURIComponent(error.message)}`);
+    const msg = `${t(loc, "signin.error.prefix")}${error.message}`;
+    redirect(`/${locale}/sign-in?error=${encodeURIComponent(msg)}`);
   }
 
   redirect(`/${locale}/sign-in?sent=1`);
