@@ -48,3 +48,8 @@ NAVIGATION_SUBMISSIONS.md
 
 # 本地临时目录与运营日志（含邮箱、验证码等敏感信息，勿提交）
 tmp/
+
+# 根目录临时截图（Vercel 面板等，勿提交仓库）
+/analytics_page.png
+/project_overview.png
+/speed_insights.png
