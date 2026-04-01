@@ -3,6 +3,7 @@ import { submitReferral } from "@/lib/actions";
 import { t } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { SubmitModeToggle } from "@/components/submit/SubmitModeToggle";
 
 export const metadata = {
   title: "Submit a Referral Code",
@@ -100,25 +101,97 @@ export default async function Page({ searchParams }: Props) {
       >
         <input type="hidden" name="locale" value="en" />
 
-        <div className="grid gap-2">
-          <label htmlFor="product_id" className="text-sm font-medium">{t("en", "submit.product")}</label>
-          <select
-            id="product_id"
-            name="product_id"
-            className="rounded-xl px-3 py-2.5 text-sm appearance-none cursor-pointer"
-            style={inputStyle}
-          >
-            <option value="">{t("en", "submit.product.ph")}</option>
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.icon} {p.name}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {t("en", "submit.product.new")}
-          </p>
-        </div>
+        <SubmitModeToggle
+          label={t("en", "submit.mode.label")}
+          helper={t("en", "submit.mode.note")}
+          existingLabel={t("en", "submit.mode.existing")}
+          newLabel={t("en", "submit.mode.new")}
+          existingSlot={
+            <div className="grid gap-2">
+              <label htmlFor="product_id" className="text-sm font-medium">{t("en", "submit.product")}</label>
+              <select
+                id="product_id"
+                name="product_id"
+                className="rounded-xl px-3 py-2.5 text-sm appearance-none cursor-pointer"
+                style={inputStyle}
+              >
+                <option value="">{t("en", "submit.product.ph")}</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.icon} {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          }
+          newSlot={
+            <div
+              className="rounded-xl border p-4"
+              style={{ borderColor: "var(--border-color)", background: "var(--bg-secondary)" }}
+            >
+              <div className="text-sm font-semibold">{t("en", "submit.new.title")}</div>
+              <div className="mt-4 grid gap-4">
+                <div className="grid gap-2">
+                  <label htmlFor="new_product_name" className="text-sm font-medium">{t("en", "submit.new.name")}</label>
+                  <input
+                    id="new_product_name"
+                    name="new_product_name"
+                    className="rounded-xl px-3 py-2.5 text-sm"
+                    style={inputStyle}
+                    placeholder={t("en", "submit.new.name.ph")}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="new_product_website" className="text-sm font-medium">{t("en", "submit.new.website")}</label>
+                  <input
+                    id="new_product_website"
+                    name="new_product_website"
+                    type="url"
+                    className="rounded-xl px-3 py-2.5 text-sm"
+                    style={inputStyle}
+                    placeholder={t("en", "submit.new.website.ph")}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="new_product_category" className="text-sm font-medium">{t("en", "submit.new.category")}</label>
+                  <select
+                    id="new_product_category"
+                    name="new_product_category"
+                    className="rounded-xl px-3 py-2.5 text-sm appearance-none cursor-pointer"
+                    style={inputStyle}
+                  >
+                    <option value="">{t("en", "submit.new.category.ph")}</option>
+                    {CATEGORY_OPTIONS.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="new_product_tagline_en" className="text-sm font-medium">{t("en", "submit.new.tagline_en")}</label>
+                  <textarea
+                    id="new_product_tagline_en"
+                    name="new_product_tagline_en"
+                    className="min-h-[70px] rounded-xl px-3 py-2.5 text-sm"
+                    style={inputStyle}
+                    placeholder={t("en", "submit.new.tagline_en.ph")}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="new_product_tagline_zh" className="text-sm font-medium">{t("en", "submit.new.tagline_zh")}</label>
+                  <textarea
+                    id="new_product_tagline_zh"
+                    name="new_product_tagline_zh"
+                    className="min-h-[70px] rounded-xl px-3 py-2.5 text-sm"
+                    style={inputStyle}
+                    placeholder={t("en", "submit.new.tagline_zh.ph")}
+                  />
+                </div>
+              </div>
+            </div>
+          }
+        />
 
         <div className="grid gap-2">
           <label htmlFor="code" className="text-sm font-medium">{t("en", "submit.code")}</label>
@@ -167,79 +240,6 @@ export default async function Page({ searchParams }: Props) {
             placeholder="描述使用此邀请码的好处..."
           />
         </div>
-
-        <details
-          className="rounded-xl border p-4"
-          style={{ borderColor: "var(--border-color)", background: "var(--bg-secondary)" }}
-        >
-          <summary className="cursor-pointer text-sm font-semibold">
-            {t("en", "submit.new.title")}
-          </summary>
-
-          <div className="mt-4 grid gap-4">
-            <div className="grid gap-2">
-              <label htmlFor="new_product_name" className="text-sm font-medium">{t("en", "submit.new.name")}</label>
-              <input
-                id="new_product_name"
-                name="new_product_name"
-                className="rounded-xl px-3 py-2.5 text-sm"
-                style={inputStyle}
-                placeholder={t("en", "submit.new.name.ph")}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <label htmlFor="new_product_website" className="text-sm font-medium">{t("en", "submit.new.website")}</label>
-              <input
-                id="new_product_website"
-                name="new_product_website"
-                type="url"
-                className="rounded-xl px-3 py-2.5 text-sm"
-                style={inputStyle}
-                placeholder={t("en", "submit.new.website.ph")}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <label htmlFor="new_product_category" className="text-sm font-medium">{t("en", "submit.new.category")}</label>
-              <select
-                id="new_product_category"
-                name="new_product_category"
-                className="rounded-xl px-3 py-2.5 text-sm appearance-none cursor-pointer"
-                style={inputStyle}
-              >
-                <option value="">{t("en", "submit.new.category.ph")}</option>
-                {CATEGORY_OPTIONS.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="grid gap-2">
-              <label htmlFor="new_product_tagline_en" className="text-sm font-medium">{t("en", "submit.new.tagline_en")}</label>
-              <textarea
-                id="new_product_tagline_en"
-                name="new_product_tagline_en"
-                className="min-h-[70px] rounded-xl px-3 py-2.5 text-sm"
-                style={inputStyle}
-                placeholder={t("en", "submit.new.tagline_en.ph")}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <label htmlFor="new_product_tagline_zh" className="text-sm font-medium">{t("en", "submit.new.tagline_zh")}</label>
-              <textarea
-                id="new_product_tagline_zh"
-                name="new_product_tagline_zh"
-                className="min-h-[70px] rounded-xl px-3 py-2.5 text-sm"
-                style={inputStyle}
-                placeholder={t("en", "submit.new.tagline_zh.ph")}
-              />
-            </div>
-          </div>
-        </details>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
