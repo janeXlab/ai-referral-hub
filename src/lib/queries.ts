@@ -13,6 +13,8 @@ export type Product = {
   icon: string | null;
   color: string | null;
   pricing: string | null;
+  review_status: string;
+  submitted_by: string | null;
 };
 
 export type ReferralWithProduct = {
@@ -73,6 +75,7 @@ export async function getAllProducts(): Promise<Product[]> {
     .from("products")
     .select("*")
     .eq("is_active", true)
+    .eq("review_status", "approved")
     .order("name");
   return (data ?? []) as Product[];
 }
@@ -83,7 +86,8 @@ export async function getAllProductSlugs(): Promise<{ slug: string }[]> {
   const { data } = await supabase
     .from("products")
     .select("slug")
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .eq("review_status", "approved");
   return (data ?? []) as { slug: string }[];
 }
 
@@ -93,6 +97,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     .from("products")
     .select("*")
     .eq("slug", slug)
+    .eq("review_status", "approved")
     .single();
   return data as Product | null;
 }
@@ -159,6 +164,7 @@ export async function getProductsByCategory(category: string) {
     .from("products")
     .select("*")
     .eq("category", category)
+    .eq("review_status", "approved")
     .eq("is_active", true);
   return (data ?? []) as Product[];
 }

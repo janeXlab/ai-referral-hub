@@ -28,6 +28,8 @@ create table public.products (
   icon text,
   color text,
   pricing text,
+  review_status text default 'approved' not null check (review_status in ('approved', 'pending', 'rejected')),
+  submitted_by uuid references public.profiles(id) on delete set null,
   is_active boolean default true,
   created_at timestamptz default now() not null
 );
@@ -92,12 +94,14 @@ create table public.click_events (
 create index idx_referrals_product on public.referrals(product_id);
 create index idx_referrals_user on public.referrals(user_id);
 create index idx_referrals_created on public.referrals(created_at desc);
+create index idx_products_review_status on public.products(review_status);
 create index idx_votes_referral on public.votes(referral_id);
 create index idx_points_user on public.points_ledger(user_id);
 create index idx_click_referral on public.click_events(referral_id);
 
 -- Row Level Security
 alter table public.profiles enable row level security;
+alter table public.products enable row level security;
 alter table public.referrals enable row level security;
 alter table public.votes enable row level security;
 alter table public.reports enable row level security;
@@ -106,6 +110,12 @@ alter table public.points_ledger enable row level security;
 -- Policies: profiles readable by all, editable by owner
 create policy "Profiles are viewable by everyone" on public.profiles for select using (true);
 create policy "Users can update own profile" on public.profiles for update using (auth.uid() = id);
+
+-- Policies: products readable when approved; auth users can submit pending products
+create policy "Approved products are viewable by everyone" on public.products
+for select using (review_status = 'approved' or submitted_by = auth.uid());
+create policy "Auth users can submit pending products" on public.products
+for insert with check (auth.uid() = submitted_by and review_status = 'pending');
 
 -- Policies: referrals readable by all, insertable by auth users
 create policy "Referrals are viewable by everyone" on public.referrals for select using (true);

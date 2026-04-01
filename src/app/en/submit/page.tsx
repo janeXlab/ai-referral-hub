@@ -9,14 +9,33 @@ export const metadata = {
   description: "Share your AI product referral code or invite link with the community.",
 };
 
-export default async function Page() {
+const CATEGORY_OPTIONS = [
+  "Chat",
+  "Coding",
+  "Image",
+  "Video",
+  "Audio",
+  "Writing",
+  "Search",
+  "Productivity",
+  "DevTools",
+];
+
+type Props = {
+  searchParams: Promise<{ submitted?: string; error?: string }>;
+};
+
+export default async function Page({ searchParams }: Props) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     redirect("/en/sign-in");
   }
 
+  const sp = await searchParams;
+  const submitted = sp.submitted;
+  const error = typeof sp.error === "string" ? sp.error : undefined;
   const products = await getAllProducts();
 
   const inputStyle = {
@@ -32,16 +51,60 @@ export default async function Page() {
         {t("en", "submit.note")}
       </p>
 
+      {submitted === "1" ? (
+        <div
+          className="mt-6 rounded-xl border px-4 py-3 text-sm"
+          style={{
+            background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+            borderColor: "var(--accent)",
+            color: "var(--text-primary)",
+          }}
+          role="status"
+        >
+          {t("en", "submit.submitted")}
+        </div>
+      ) : null}
+
+      {submitted === "pending" ? (
+        <div
+          className="mt-6 rounded-xl border px-4 py-3 text-sm"
+          style={{
+            background: "color-mix(in srgb, #f59e0b 12%, transparent)",
+            borderColor: "rgba(245, 158, 11, 0.45)",
+            color: "var(--text-primary)",
+          }}
+          role="status"
+        >
+          {t("en", "submit.submitted.pending")}
+        </div>
+      ) : null}
+
+      {error ? (
+        <div
+          className="mt-6 rounded-xl border px-4 py-3 text-sm"
+          style={{
+            background: "color-mix(in srgb, #ef4444 12%, transparent)",
+            borderColor: "rgba(239, 68, 68, 0.45)",
+            color: "var(--text-primary)",
+          }}
+          role="alert"
+        >
+          {error}
+        </div>
+      ) : null}
+
       <form
         action={submitReferral}
         className="mt-8 space-y-5 rounded-xl p-6"
         style={{ background: "var(--bg-card)", border: "1px solid var(--border-color)" }}
       >
+        <input type="hidden" name="locale" value="en" />
+
         <div className="grid gap-2">
-          <label className="text-sm font-medium">{t("en", "submit.product")}</label>
+          <label htmlFor="product_id" className="text-sm font-medium">{t("en", "submit.product")}</label>
           <select
+            id="product_id"
             name="product_id"
-            required
             className="rounded-xl px-3 py-2.5 text-sm appearance-none cursor-pointer"
             style={inputStyle}
           >
@@ -52,11 +115,15 @@ export default async function Page() {
               </option>
             ))}
           </select>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            {t("en", "submit.product.new")}
+          </p>
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium">{t("en", "submit.code")}</label>
+          <label htmlFor="code" className="text-sm font-medium">{t("en", "submit.code")}</label>
           <input
+            id="code"
             name="code"
             required
             className="rounded-xl px-3 py-2.5 text-sm"
@@ -66,8 +133,9 @@ export default async function Page() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium">Referral Link (optional)</label>
+          <label htmlFor="link" className="text-sm font-medium">{t("en", "submit.link")}</label>
           <input
+            id="link"
             name="link"
             type="url"
             className="rounded-xl px-3 py-2.5 text-sm"
@@ -77,8 +145,9 @@ export default async function Page() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium">{t("en", "submit.benefit")} (English)</label>
+          <label htmlFor="benefit_en" className="text-sm font-medium">{t("en", "submit.benefit")} (English)</label>
           <textarea
+            id="benefit_en"
             name="benefit_en"
             required
             className="min-h-[70px] rounded-xl px-3 py-2.5 text-sm"
@@ -88,8 +157,9 @@ export default async function Page() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium">{t("en", "submit.benefit")} (Chinese)</label>
+          <label htmlFor="benefit_zh" className="text-sm font-medium">{t("en", "submit.benefit")} (Chinese)</label>
           <textarea
+            id="benefit_zh"
             name="benefit_zh"
             required
             className="min-h-[70px] rounded-xl px-3 py-2.5 text-sm"
@@ -98,10 +168,84 @@ export default async function Page() {
           />
         </div>
 
+        <details
+          className="rounded-xl border p-4"
+          style={{ borderColor: "var(--border-color)", background: "var(--bg-secondary)" }}
+        >
+          <summary className="cursor-pointer text-sm font-semibold">
+            {t("en", "submit.new.title")}
+          </summary>
+
+          <div className="mt-4 grid gap-4">
+            <div className="grid gap-2">
+              <label htmlFor="new_product_name" className="text-sm font-medium">{t("en", "submit.new.name")}</label>
+              <input
+                id="new_product_name"
+                name="new_product_name"
+                className="rounded-xl px-3 py-2.5 text-sm"
+                style={inputStyle}
+                placeholder={t("en", "submit.new.name.ph")}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="new_product_website" className="text-sm font-medium">{t("en", "submit.new.website")}</label>
+              <input
+                id="new_product_website"
+                name="new_product_website"
+                type="url"
+                className="rounded-xl px-3 py-2.5 text-sm"
+                style={inputStyle}
+                placeholder={t("en", "submit.new.website.ph")}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="new_product_category" className="text-sm font-medium">{t("en", "submit.new.category")}</label>
+              <select
+                id="new_product_category"
+                name="new_product_category"
+                className="rounded-xl px-3 py-2.5 text-sm appearance-none cursor-pointer"
+                style={inputStyle}
+              >
+                <option value="">{t("en", "submit.new.category.ph")}</option>
+                {CATEGORY_OPTIONS.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="new_product_tagline_en" className="text-sm font-medium">{t("en", "submit.new.tagline_en")}</label>
+              <textarea
+                id="new_product_tagline_en"
+                name="new_product_tagline_en"
+                className="min-h-[70px] rounded-xl px-3 py-2.5 text-sm"
+                style={inputStyle}
+                placeholder={t("en", "submit.new.tagline_en.ph")}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="new_product_tagline_zh" className="text-sm font-medium">{t("en", "submit.new.tagline_zh")}</label>
+              <textarea
+                id="new_product_tagline_zh"
+                name="new_product_tagline_zh"
+                className="min-h-[70px] rounded-xl px-3 py-2.5 text-sm"
+                style={inputStyle}
+                placeholder={t("en", "submit.new.tagline_zh.ph")}
+              />
+            </div>
+          </div>
+        </details>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
-            <label className="text-sm font-medium">{t("en", "submit.region")}</label>
+            <label htmlFor="region" className="text-sm font-medium">{t("en", "submit.region")}</label>
             <input
+              id="region"
               name="region"
               className="rounded-xl px-3 py-2.5 text-sm"
               style={inputStyle}
@@ -109,8 +253,9 @@ export default async function Page() {
             />
           </div>
           <div className="grid gap-2">
-            <label className="text-sm font-medium">{t("en", "submit.expiry")}</label>
+            <label htmlFor="expires_at" className="text-sm font-medium">{t("en", "submit.expiry")}</label>
             <input
+              id="expires_at"
               name="expires_at"
               type="date"
               className="rounded-xl px-3 py-2.5 text-sm"

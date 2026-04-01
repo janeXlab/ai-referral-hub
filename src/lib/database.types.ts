@@ -46,6 +46,8 @@ export type Database = {
           icon: string | null;
           color: string | null;
           pricing: string | null;
+          review_status: string;
+          submitted_by: string | null;
           is_active: boolean;
           created_at: string;
         };
@@ -60,6 +62,8 @@ export type Database = {
           icon?: string | null;
           color?: string | null;
           pricing?: string | null;
+          review_status?: string;
+          submitted_by?: string | null;
           is_active?: boolean;
           created_at?: string;
         };
@@ -74,10 +78,20 @@ export type Database = {
           icon?: string | null;
           color?: string | null;
           pricing?: string | null;
+          review_status?: string;
+          submitted_by?: string | null;
           is_active?: boolean;
           created_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "products_submitted_by_fkey";
+            columns: ["submitted_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       referrals: {
         Row: {

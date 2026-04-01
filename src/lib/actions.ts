@@ -3,7 +3,24 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { t } from "@/lib/i18n";
+import { t, type Locale } from "@/lib/i18n";
+
+function normalizeLocale(value: string | null): Locale {
+  return value === "zh" ? "zh" : "en";
+}
+
+function slugifyProductName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+}
+
+function buildSubmitErrorPath(locale: Locale, message: string): never {
+  redirect(`/${locale}/submit?error=${encodeURIComponent(message)}`);
+}
 
 export async function signInWithGitHub(locale: string) {
   const supabase = await createClient();
@@ -50,11 +67,10 @@ export async function signInWithEmail(formData: FormData): Promise<void> {
   const raw = (formData.get("email") as string) || "";
   const email = raw.trim().toLowerCase();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const locale = (formData.get("locale") as string) || "en";
+  const locale = normalizeLocale((formData.get("locale") as string) || "en");
 
-  const loc = locale === "zh" ? "zh" : "en";
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    redirect(`/${locale}/sign-in?error=${encodeURIComponent(t(loc, "signin.error.invalid"))}`);
+    redirect(`/${locale}/sign-in?error=${encodeURIComponent(t(locale, "signin.error.invalid"))}`);
   }
 
   const { error } = await supabase.auth.signInWithOtp({
@@ -65,7 +81,7 @@ export async function signInWithEmail(formData: FormData): Promise<void> {
   });
 
   if (error) {
-    const msg = `${t(loc, "signin.error.prefix")}${error.message}`;
+    const msg = `${t(locale, "signin.error.prefix")}${error.message}`;
     redirect(`/${locale}/sign-in?error=${encodeURIComponent(msg)}`);
   }
 
@@ -81,26 +97,126 @@ export async function signOut() {
 
 export async function submitReferral(formData: FormData): Promise<void> {
   const supabase = await createClient();
-  
+  const locale = normalizeLocale(formData.get("locale") as string);
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    redirect("/en/sign-in");
+    redirect(`/${locale}/sign-in`);
   }
 
-  const productId = formData.get("product_id") as string;
-  const code = formData.get("code") as string;
-  const link = (formData.get("link") as string) || null;
-  const benefitEn = formData.get("benefit_en") as string;
-  const benefitZh = formData.get("benefit_zh") as string;
-  const region = (formData.get("region") as string) || "Global";
-  const expiresAt = (formData.get("expires_at") as string) || null;
+  const productId = ((formData.get("product_id") as string) || "").trim();
+  const code = ((formData.get("code") as string) || "").trim();
+  const link = ((formData.get("link") as string) || "").trim() || null;
+  const benefitEn = ((formData.get("benefit_en") as string) || "").trim();
+  const benefitZh = ((formData.get("benefit_zh") as string) || "").trim();
+  const region = ((formData.get("region") as string) || "").trim() || "Global";
+  const expiresAt = ((formData.get("expires_at") as string) || "").trim() || null;
+  const newProductName = ((formData.get("new_product_name") as string) || "").trim();
+  const newProductWebsite = ((formData.get("new_product_website") as string) || "").trim();
+  const newProductCategory = ((formData.get("new_product_category") as string) || "").trim();
+  const newProductTaglineEn = ((formData.get("new_product_tagline_en") as string) || "").trim();
+  const newProductTaglineZh = ((formData.get("new_product_tagline_zh") as string) || "").trim();
 
-  if (!productId || !code || !benefitEn || !benefitZh) {
-    redirect("/en/submit?error=missing");
+  const hasNewProductInput = Boolean(
+    newProductName || newProductWebsite || newProductCategory || newProductTaglineEn || newProductTaglineZh
+  );
+
+  if (!code || !benefitEn || !benefitZh) {
+    buildSubmitErrorPath(locale, t(locale, "submit.error.missing"));
+  }
+
+  if (!productId && !hasNewProductInput) {
+    buildSubmitErrorPath(locale, t(locale, "submit.error.product_required"));
+  }
+
+  if (
+    !productId
+    && (!newProductName || !newProductWebsite || !newProductCategory || !newProductTaglineEn || !newProductTaglineZh)
+  ) {
+    buildSubmitErrorPath(locale, t(locale, "submit.error.new_product_incomplete"));
+  }
+
+  if (link) {
+    try {
+      new URL(link);
+    } catch {
+      buildSubmitErrorPath(locale, t(locale, "submit.error.invalid_referral_link"));
+    }
+  }
+
+  let resolvedProductId = productId;
+  let shouldPublishReferral = true;
+
+  if (productId) {
+    const { data: existingProduct, error: productError } = await supabase
+      .from("products")
+      .select("id")
+      .eq("id", productId)
+      .eq("is_active", true)
+      .eq("review_status", "approved")
+      .maybeSingle();
+
+    if (productError || !existingProduct) {
+      buildSubmitErrorPath(locale, t(locale, "submit.error.invalid_product"));
+    }
+  } else {
+    let normalizedWebsite: string;
+    try {
+      normalizedWebsite = new URL(newProductWebsite).toString();
+    } catch {
+      buildSubmitErrorPath(locale, t(locale, "submit.error.invalid_product_website"));
+    }
+
+    const { data: productByWebsite } = await supabase
+      .from("products")
+      .select("id, review_status")
+      .eq("website", normalizedWebsite)
+      .maybeSingle();
+
+    const { data: productByName } = await supabase
+      .from("products")
+      .select("id, review_status")
+      .eq("name", newProductName)
+      .maybeSingle();
+
+    const matchedProduct = productByWebsite ?? productByName;
+
+    if (matchedProduct) {
+      resolvedProductId = matchedProduct.id;
+      shouldPublishReferral = matchedProduct.review_status === "approved";
+    } else {
+      const baseSlug = slugifyProductName(newProductName) || "product";
+      const candidateSlug = `${baseSlug}-${Date.now().toString(36)}`;
+      const { data: createdProduct, error: createProductError } = await supabase
+        .from("products")
+        .insert({
+          slug: candidateSlug,
+          name: newProductName,
+          tagline_en: newProductTaglineEn,
+          tagline_zh: newProductTaglineZh,
+          category: newProductCategory,
+          website: normalizedWebsite,
+          icon: "✨",
+          color: "#6b7280",
+          pricing: null,
+          review_status: "pending",
+          submitted_by: user.id,
+          is_active: true,
+        })
+        .select("id")
+        .single();
+
+      if (createProductError || !createdProduct) {
+        buildSubmitErrorPath(locale, t(locale, "submit.error.product_create_failed"));
+      }
+
+      resolvedProductId = createdProduct.id;
+      shouldPublishReferral = false;
+    }
   }
 
   const { error } = await supabase.from("referrals").insert({
-    product_id: productId,
+    product_id: resolvedProductId,
     user_id: user.id,
     code,
     link,
@@ -108,13 +224,14 @@ export async function submitReferral(formData: FormData): Promise<void> {
     benefit_zh: benefitZh,
     region,
     expires_at: expiresAt,
+    is_active: shouldPublishReferral,
   });
 
   if (error) {
     if (error.code === "23505") {
-      redirect("/en/submit?error=duplicate");
+      buildSubmitErrorPath(locale, t(locale, "submit.error.duplicate"));
     }
-    redirect(`/en/submit?error=${encodeURIComponent(error.message)}`);
+    buildSubmitErrorPath(locale, `${t(locale, "submit.error.prefix")}${error.message}`);
   }
 
   // Award points
@@ -139,7 +256,11 @@ export async function submitReferral(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/", "layout");
-  redirect("/en?submitted=1");
+  if (shouldPublishReferral) {
+    redirect(`/${locale}/submit?submitted=1`);
+  }
+
+  redirect(`/${locale}/submit?submitted=pending`);
 }
 
 export async function vote(referralId: string, value: 1 | -1) {
