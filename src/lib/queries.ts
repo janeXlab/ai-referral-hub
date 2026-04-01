@@ -1,5 +1,6 @@
 import type { Database } from "@/lib/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type Product = {
   id: string;
@@ -74,6 +75,16 @@ export async function getAllProducts(): Promise<Product[]> {
     .eq("is_active", true)
     .order("name");
   return (data ?? []) as Product[];
+}
+
+// Use admin client (no cookies) — safe to call in generateStaticParams at build time
+export async function getAllProductSlugs(): Promise<{ slug: string }[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("products")
+    .select("slug")
+    .eq("is_active", true);
+  return (data ?? []) as { slug: string }[];
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {

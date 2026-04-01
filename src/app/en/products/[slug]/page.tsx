@@ -1,12 +1,11 @@
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/AdSlot";
 import { ReferralCard } from "@/components/ReferralCard";
-import { getAllProducts, getProductBySlug, getReferralsForProduct } from "@/lib/queries";
+import { getAllProductSlugs, getProductBySlug, getReferralsForProduct } from "@/lib/queries";
 import { t } from "@/lib/i18n";
 
 export async function generateStaticParams() {
-  const products = await getAllProducts();
-  return products.map((p) => ({ slug: p.slug }));
+  return getAllProductSlugs();
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
