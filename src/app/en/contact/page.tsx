@@ -9,12 +9,12 @@ export default function Page() {
       <div className="prose prose-invert prose-sm max-w-none space-y-6" style={{ color: "var(--text-secondary)" }}>
         <p>
           We&apos;d love to hear from you! If you have any questions, feedback, or need help with a referral code, 
-          you can reach us through the following channels:
+          you can reach us through our GitHub repository.
         </p>
         <ul className="list-disc pl-5">
-          <li>Email: hello@ai-referral-hub.local</li>
-          <li>Twitter: @janeXlab</li>
-          <li>GitHub: janeXlab/ai-referral-hub</li>
+          <li>
+            GitHub: <a href="https://github.com/janeXlab/ai-referral-hub" target="_blank" rel="noreferrer noopener" className="underline">janeXlab/ai-referral-hub</a>
+          </li>
         </ul>
         <p>
           If you encounter any bugs or want to suggest a feature, please feel free to open an issue on our GitHub repository.

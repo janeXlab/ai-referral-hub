@@ -9,12 +9,12 @@ export default function Page() {
       <div className="prose prose-invert prose-sm max-w-none space-y-6" style={{ color: "var(--text-secondary)" }}>
         <p>
           我们期待听到你的建议！如果你有任何疑问、反馈或需要关于邀请码的帮助，
-          你可以通过以下渠道联系我们：
+          你可以通过我们的 GitHub 仓库联系我们：
         </p>
         <ul className="list-disc pl-5">
-          <li>电子邮箱: hello@ai-referral-hub.local</li>
-          <li>推特 (Twitter): @janeXlab</li>
-          <li>GitHub: janeXlab/ai-referral-hub</li>
+          <li>
+            GitHub: <a href="https://github.com/janeXlab/ai-referral-hub" target="_blank" rel="noreferrer noopener" className="underline">janeXlab/ai-referral-hub</a>
+          </li>
         </ul>
         <p>
           如果你遇到了任何 Bug 或想建议一个新功能，请随时在我们的 GitHub 仓库中打开一个 issue。
