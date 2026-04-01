@@ -4,7 +4,7 @@ import { getAllProducts } from "@/lib/queries";
 
 export const revalidate = 3600;
 
-const BASE_URL = "https://aireferralhub.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://ai-referral-hub.vercel.app";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

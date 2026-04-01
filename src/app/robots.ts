@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/", "/en/me", "/zh/me", "/en/sign-in", "/zh/sign-in"],
     },
-    sitemap: "https://aireferralhub.com/sitemap.xml",
+    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || "https://ai-referral-hub.vercel.app"}/sitemap.xml`,
   };
 }
