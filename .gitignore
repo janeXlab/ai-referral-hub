@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 内部文档（不随仓库公开）
+AGENTS.md
+CLAUDE.md
+PROMOTION.md
+NAVIGATION_SUBMISSIONS.md
