@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
 
@@ -12,18 +13,18 @@ export function SiteFooter({ locale }: { locale: Locale }) {
           </div>
 
           <nav className="flex gap-6 text-sm" style={{ color: "var(--text-muted)" }}>
-            <a className="hover:text-white transition-colors" href={`/${locale}`}>
+            <Link className="hover:text-white transition-colors" href={`/${locale}/about`}>
               {t(locale, "footer.about")}
-            </a>
-            <a className="hover:text-white transition-colors" href={`/${locale}`}>
+            </Link>
+            <Link className="hover:text-white transition-colors" href={`/${locale}/contact`}>
               {t(locale, "footer.contact")}
-            </a>
-            <a className="hover:text-white transition-colors" href={`/${locale}`}>
+            </Link>
+            <Link className="hover:text-white transition-colors" href={`/${locale}/privacy`}>
               {t(locale, "footer.privacy")}
-            </a>
-            <a className="hover:text-white transition-colors" href={`/${locale}`}>
+            </Link>
+            <Link className="hover:text-white transition-colors" href={`/${locale}/terms`}>
               {t(locale, "footer.terms")}
-            </a>
+            </Link>
           </nav>
 
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
