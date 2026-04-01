@@ -114,6 +114,19 @@ export const PRODUCTS: Product[] = [
     pricing: "Free / Pro $15/mo",
   },
   {
+    slug: "glm-coding",
+    name: "GLM Coding",
+    tagline: {
+      en: "Zhipu coding model on BigModel — 20+ IDE & tool integrations",
+      zh: "智谱编程大模型，20+ 主流工具全适配，性价比突出",
+    },
+    category: "Coding",
+    website: "https://www.bigmodel.cn/glm-coding",
+    icon: "🧩",
+    color: "#0f766e",
+    pricing: "套餐订阅 / 拼团邀请返现",
+  },
+  {
     slug: "v0",
     name: "v0",
     tagline: { en: "AI UI generator by Vercel", zh: "Vercel 出品的 AI UI 生成器" },
@@ -477,6 +490,22 @@ export const REFERRALS: Referral[] = [
     author: { handle: "gen-artist" },
     verified: true,
     votes: 25,
+    reports: 0,
+  },
+  {
+    id: "r21",
+    productSlug: "glm-coding",
+    code: "GLM-CODING-TEAM-AH9B",
+    link: "https://www.bigmodel.cn/glm-coding?ic=AH9BAGV7YN",
+    benefit: {
+      en: "「Pin Hao Mo」invite: 5% off for friends; 10% paid-amount bonus after 3 subs; +10% pool every 30 invites; credits for any BigModel use.",
+      zh: "「拼好模」：好友新购立减 5%；3 人订阅后实付 10% 赠金；满 30 人再奖 10%；赠金全站可用。",
+    },
+    region: "CN",
+    createdAt: "2026-04-01",
+    author: { handle: "zhipu-team" },
+    verified: true,
+    votes: 42,
     reports: 0,
   },
 ];

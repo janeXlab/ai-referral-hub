@@ -47,6 +47,17 @@ const PRODUCTS = [
   { slug: "cursor", name: "Cursor", tagline_en: "AI-first code editor", tagline_zh: "AI 优先的代码编辑器", category: "Coding", website: "https://www.cursor.com/", icon: "⌨️", color: "#8b5cf6", pricing: "Free / Pro $20/mo" },
   { slug: "github-copilot", name: "GitHub Copilot", tagline_en: "AI pair programmer by GitHub", tagline_zh: "GitHub AI 编程助手", category: "Coding", website: "https://github.com/features/copilot", icon: "🐙", color: "#238636", pricing: "Individual $10/mo" },
   { slug: "windsurf", name: "Windsurf", tagline_en: "AI-powered IDE by Codeium", tagline_zh: "Codeium 出品的 AI IDE", category: "Coding", website: "https://codeium.com/windsurf", icon: "🏄", color: "#09b6a2", pricing: "Free / Pro $15/mo" },
+  {
+    slug: "glm-coding",
+    name: "GLM Coding",
+    tagline_en: "Zhipu coding model on BigModel — 20+ IDE & tool integrations",
+    tagline_zh: "智谱编程大模型，20+ 主流工具全适配，性价比突出",
+    category: "Coding",
+    website: "https://www.bigmodel.cn/glm-coding",
+    icon: "🧩",
+    color: "#0f766e",
+    pricing: "套餐订阅 / 拼团邀请返现",
+  },
   { slug: "v0", name: "v0", tagline_en: "AI UI generator by Vercel", tagline_zh: "Vercel 出品的 AI UI 生成器", category: "DevTools", website: "https://v0.dev/", icon: "🔺", color: "#000000", pricing: "Free / Premium $20/mo" },
   { slug: "bolt", name: "Bolt.new", tagline_en: "Full-stack AI web app builder", tagline_zh: "全栈 AI Web 应用构建器", category: "DevTools", website: "https://bolt.new/", icon: "⚡", color: "#f97316", pricing: "Free / Pro $20/mo" },
   { slug: "lovable", name: "Lovable", tagline_en: "AI full-stack engineer for web apps", tagline_zh: "AI 全栈工程师，构建 Web 应用", category: "DevTools", website: "https://lovable.dev/", icon: "💜", color: "#a855f7", pricing: "Free / Pro $20/mo" },
@@ -92,6 +103,20 @@ const REFERRALS_BY_SLUG: Record<string, Array<{
   ],
   windsurf: [
     { code: "WINDSURF-BONUS", benefit_en: "500 extra AI completions on first month", benefit_zh: "首月额外 500 次 AI 补全", region: "Global", is_verified: false, author_handle: "coder99", created_at: "2026-03-27T10:00:00Z" },
+  ],
+  "glm-coding": [
+    {
+      code: "GLM-CODING-TEAM-AH9B",
+      link: "https://www.bigmodel.cn/glm-coding?ic=AH9BAGV7YN",
+      benefit_en:
+        "「Pin Hao Mo」invite: friends get 5% off first purchase; after 3 friends subscribe, you get 10% of paid amount as bonus credit; every 30 successful invites, extra 10% pool bonus; credits usable on BigModel (API, packs, subscriptions).",
+      benefit_zh:
+        "「拼好模」组队：好友新购立减 5%；3 位好友订阅 GLM Coding 套餐后，邀请人获实付金额 10% 赠金返现；每满 30 人再获该 30 单实付总额 10% 奖励；赠金可用于 BigModel 任意消费（资源包、API、套餐等）。复制专属链接或海报邀请好友。",
+      region: "CN",
+      is_verified: true,
+      author_handle: "zhipu-team",
+      created_at: "2026-04-01T08:00:00Z",
+    },
   ],
   v0: [
     { code: "V0-PREMIUM-TRY", benefit_en: "2 weeks Premium access free", benefit_zh: "2 周 Premium 免费体验", region: "Global", is_verified: true, author_handle: "ui-maker", created_at: "2026-03-26T10:00:00Z" },
